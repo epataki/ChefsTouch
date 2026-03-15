@@ -1,0 +1,15 @@
+{
+  "name": "Chef Evan's App",
+  "short_name": "Chef Evan",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#f7f7f5",
+  "theme_color": "#16a34a",
+  "icons": [
+    {
+      "src": "icon.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
