@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#1D9E75">
+<title>Chef's Touch</title>
+<link rel="manifest" href="data:application/json;base64,eyJuYW1lIjoiQ2hlZidzIFRvdWNoIiwic2hvcnRfbmFtZSI6IkNoZWYncyBUb3VjaCIsInN0YXJ0X3VybCI6Ii4iLCJkaXNwbGF5Ijoic3RhbmRhbG9uZSIsImJhY2tncm91bmRfY29sb3IiOiIjZmZmZmZmIiwidGhlbWVfY29sb3IiOiIjMUQ5RTc1In0=">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;1,400&family=Instrument+Serif&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+--bg:#ffffff;--bg2:#f5f5f4;--t1:#1a1a1a;--t2:#6b6b6b;--t3:#a3a3a3;
+--bd:rgba(0,0,0,0.08);--bd2:rgba(0,0,0,0.15);
+--acc:#1D9E75;--acc-light:#E1F5EE;--acc-dark:#0F6E56;
+--r-lg:12px;--r-md:8px;
+--font:'DM Sans',system-ui,-apple-system,sans-serif;
+--evan:#378ADD;--evan-light:#E6F1FB;--kara:#D4537E;--kara-light:#FBEAF0
+}
+@media(prefers-color-scheme:dark){
+:root{--bg:#1a1a1a;--bg2:#262626;--t1:#e5e5e5;--t2:#a3a3a3;--t3:#737373;
+--bd:rgba(255,255,255,0.08);--bd2:rgba(255,255,255,0.15);
+--acc-light:#0a3d2e;--acc-dark:#5DCAA5;
+--evan-light:#0c2d4a;--kara-light:#3d1528}
+}
+body,html{font-family:var(--font);color:var(--t1);background:var(--bg);-webkit-tap-highlight-color:transparent;overflow-x:hidden}
+input,button,select,textarea{font-family:var(--font);-webkit-appearance:none}
+.app{max-width:480px;margin:0 auto;padding:0 16px 80px;min-height:100dvh;position:relative}
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;display:flex;background:var(--bg);border-top:0.5px solid var(--bd);z-index:50;padding:6px 0 env(safe-area-inset-bottom,8px);max-width:100%}
+.nav-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px 4px;cursor:pointer;border:none;background:none;color:var(--t3);font-size:10px;font-family:var(--font);transition:color 0.15s}
+.nav-item.active{color:var(--acc)}
+.nav-item svg{width:22px;height:22px}
+.header{display:flex;align-items:center;justify-content:space-between;padding:16px 0 12px;border-bottom:0.5px solid var(--bd);margin-bottom:16px}
+.logo{font-family:'Instrument Serif',serif;font-size:24px;letter-spacing:-0.5px}
+.logo span{color:var(--acc)}
+.header-right{font-size:13px;color:var(--t3);display:flex;align-items:center;gap:8px}
+.search-bar{position:relative;margin-bottom:12px}
+.search-bar input{width:100%;height:40px;border-radius:20px;border:0.5px solid var(--bd);padding:0 16px 0 38px;font-size:14px;background:var(--bg2);color:var(--t1);outline:none;transition:all 0.2s}
+.search-bar input:focus{border-color:var(--acc);background:var(--bg);box-shadow:0 0 0 3px rgba(29,158,117,0.12)}
+.search-bar svg{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--t3)}
+.tags{display:flex;gap:6px;overflow-x:auto;padding-bottom:8px;margin-bottom:12px;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.tags::-webkit-scrollbar{display:none}
+.tag{padding:6px 14px;border-radius:20px;font-size:12px;border:0.5px solid var(--bd);background:var(--bg);cursor:pointer;white-space:nowrap;transition:all 0.15s;color:var(--t2)}
+.tag:hover{border-color:var(--bd2)}
+.tag.active{background:var(--acc);color:white;border-color:var(--acc);font-weight:500}
+.tag.fav-evan{background:var(--evan-light);color:var(--evan);border-color:var(--evan)}
+.tag.fav-kara{background:var(--kara-light);color:var(--kara);border-color:var(--kara)}
+.recipe-list{display:flex;flex-direction:column;gap:8px}
+.recipe-card{display:flex;gap:12px;padding:12px;border-radius:var(--r-lg);border:0.5px solid var(--bd);background:var(--bg);cursor:pointer;transition:all 0.15s;align-items:center}
+.recipe-card:active{transform:scale(0.98)}
+.recipe-thumb{width:46px;height:46px;border-radius:var(--r-md);background:var(--bg2);display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0}
+.recipe-info{flex:1;min-width:0}
+.recipe-title-row{display:flex;align-items:center;gap:6px}
+.recipe-title{font-size:14px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fav-dots{display:flex;gap:3px;flex-shrink:0}
+.fav-dot{width:8px;height:8px;border-radius:50%}
+.fav-dot.evan{background:var(--evan)}
+.fav-dot.kara{background:var(--kara)}
+.recipe-meta{font-size:11px;color:var(--t3);display:flex;gap:8px;align-items:center;margin-top:2px}
+.recipe-meta span{display:flex;align-items:center;gap:3px}
+.recipe-tag-pill{font-size:10px;padding:2px 7px;border-radius:10px;background:var(--acc-light);color:var(--acc-dark);font-weight:500}
+.empty-state{text-align:center;padding:40px 16px;color:var(--t3)}
+.empty-state p{font-size:13px;line-height:1.6}
+.fab{position:fixed;bottom:76px;right:20px;width:52px;height:52px;border-radius:50%;background:var(--acc);color:white;border:none;font-size:28px;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 16px rgba(29,158,117,0.3);transition:all 0.15s;z-index:40}
+.fab:active{transform:scale(0.93)}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:200;display:flex;align-items:flex-end;justify-content:center}
+.modal{background:var(--bg);border-radius:16px 16px 0 0;width:100%;max-width:480px;max-height:90vh;overflow-y:auto;padding:20px;animation:slideUp 0.25s ease;-webkit-overflow-scrolling:touch}
+@keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.modal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
+.modal-header h2{font-size:17px;font-weight:500}
+.close-btn{background:none;border:none;font-size:18px;cursor:pointer;color:var(--t3);padding:4px}
+.form-group{margin-bottom:14px}
+.form-group label{display:block;font-size:12px;color:var(--t2);margin-bottom:5px;font-weight:500}
+.form-group input,.form-group textarea{width:100%;border:0.5px solid var(--bd);border-radius:var(--r-md);padding:10px 12px;font-size:16px;background:var(--bg);color:var(--t1);outline:none;transition:border-color 0.2s}
+.form-group input:focus,.form-group textarea:focus{border-color:var(--acc)}
+.form-group textarea{resize:vertical;min-height:80px;line-height:1.5;font-size:14px}
+.btn{padding:10px 20px;border-radius:var(--r-md);font-size:14px;font-weight:500;cursor:pointer;border:none;transition:all 0.15s}
+.btn-primary{background:var(--acc);color:white}
+.btn-primary:active{background:var(--acc-dark)}
+.btn-outline{background:transparent;border:0.5px solid var(--bd);color:var(--t2)}
+.btn-outline:active{background:var(--bg2)}
+.btn-sm{padding:7px 14px;font-size:12px}
+.btn-danger{background:transparent;border:0.5px solid #E24B4A;color:#E24B4A}
+.detail-view{padding-bottom:16px}
+.detail-back{display:flex;align-items:center;gap:6px;font-size:14px;color:var(--t2);cursor:pointer;border:none;background:none;padding:10px 0;margin-bottom:8px;font-family:var(--font)}
+.detail-title{font-family:'Instrument Serif',serif;font-size:26px;margin-bottom:6px;line-height:1.2}
+.detail-tags{display:flex;gap:5px;margin-bottom:12px;flex-wrap:wrap}
+.detail-meta{display:flex;gap:14px;margin-bottom:16px;font-size:12px;color:var(--t2)}
+.detail-meta span{display:flex;align-items:center;gap:4px}
+.section-title{font-size:13px;font-weight:500;text-transform:uppercase;letter-spacing:0.5px;color:var(--t3);margin-bottom:8px;padding-bottom:5px;border-bottom:0.5px solid var(--bd)}
+.ingredient-list{list-style:none;margin-bottom:20px}
+.ingredient-list li{padding:8px 0;border-bottom:0.5px solid var(--bd);font-size:14px;display:flex;align-items:center;gap:10px;cursor:pointer;-webkit-user-select:none}
+.ingredient-list li:last-child{border-bottom:none}
+.ing-check{width:20px;height:20px;border-radius:50%;border:1.5px solid var(--bd2);flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all 0.15s}
+.ing-check.checked{background:var(--acc);border-color:var(--acc)}
+.ing-check.checked::after{content:'';display:block;width:6px;height:6px;background:white;border-radius:50%}
+.ing-text.checked{text-decoration:line-through;color:var(--t3)}
+.step-list{list-style:none;margin-bottom:20px;counter-reset:steps}
+.step-list li{padding:10px 0;font-size:14px;line-height:1.6;display:flex;gap:12px;counter-increment:steps}
+.step-list li::before{content:counter(steps);flex-shrink:0;width:24px;height:24px;border-radius:50%;background:var(--bg2);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:500;color:var(--t2);margin-top:2px}
+.detail-actions{display:flex;gap:8px;margin-top:16px}
+.url-badge{display:inline-flex;align-items:center;gap:4px;font-size:11px;color:var(--acc-dark);background:var(--acc-light);padding:4px 10px;border-radius:10px;margin-bottom:10px;text-decoration:none}
+.tab-bar{display:flex;border-bottom:0.5px solid var(--bd);margin-bottom:14px}
+.tab-bar button{flex:1;padding:10px;background:none;border:none;border-bottom:2px solid transparent;font-size:13px;color:var(--t3);cursor:pointer;font-family:var(--font);transition:all 0.15s}
+.tab-bar button.active{color:var(--acc);border-bottom-color:var(--acc);font-weight:500}
+.tag-input-row{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.tag-input-row input{flex:1;min-width:80px}
+.mini-tag{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:10px;background:var(--acc-light);color:var(--acc-dark);font-size:12px}
+.mini-tag button{background:none;border:none;cursor:pointer;color:var(--acc-dark);font-size:14px;line-height:1;padding:0}
+.servings-ctrl{display:inline-flex;align-items:center;gap:8px;margin-bottom:14px}
+.servings-ctrl button{width:28px;height:28px;border-radius:50%;border:0.5px solid var(--bd);background:var(--bg);cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;color:var(--t2)}
+.fav-toggle{display:flex;gap:8px;margin-bottom:12px}
+.fav-btn{padding:6px 16px;border-radius:20px;font-size:12px;cursor:pointer;border:0.5px solid var(--bd);background:var(--bg);transition:all 0.15s;font-family:var(--font);font-weight:500}
+.fav-btn.evan-active{background:var(--evan-light);color:var(--evan);border-color:var(--evan)}
+.fav-btn.kara-active{background:var(--kara-light);color:var(--kara);border-color:var(--kara)}
+.day-row{display:flex;align-items:center;gap:8px;padding:10px 0;border-bottom:0.5px solid var(--bd);font-size:14px}
+.day-row:last-child{border-bottom:none}
+.day-name{font-weight:500;min-width:34px;color:var(--t2);font-size:12px}
+.day-meal{flex:1;min-width:0}
+.day-meal input{width:100%;border:none;background:transparent;font-size:14px;color:var(--t1);outline:none;font-family:var(--font);padding:2px 0}
+.day-meal input::placeholder{color:var(--t3)}
+.day-link-btn{background:none;border:none;cursor:pointer;color:var(--t3);padding:4px;display:flex;align-items:center;opacity:0.5;transition:opacity 0.15s}
+.day-link-btn.linked{color:var(--acc);opacity:1}
+.grocery-add{display:flex;gap:8px;margin-bottom:14px}
+.grocery-add input{flex:1;border:0.5px solid var(--bd);border-radius:var(--r-md);padding:10px 12px;font-size:16px;background:var(--bg);color:var(--t1);outline:none}
+.grocery-add input:focus{border-color:var(--acc)}
+.grocery-item{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:0.5px solid var(--bd);font-size:14px}
+.grocery-item:last-child{border-bottom:none}
+.grocery-text{flex:1}
+.grocery-text.checked{text-decoration:line-through;color:var(--t3)}
+.copy-banner{position:fixed;top:env(safe-area-inset-top,16px);left:50%;transform:translateX(-50%);background:var(--acc);color:white;padding:10px 20px;border-radius:var(--r-md);font-size:13px;font-weight:500;z-index:300;animation:fadeIO 2s ease forwards;white-space:nowrap}
+@keyframes fadeIO{0%{opacity:0;transform:translateX(-50%) translateY(-10px)}15%{opacity:1;transform:translateX(-50%) translateY(0)}85%{opacity:1}100%{opacity:0;transform:translateX(-50%) translateY(-10px)}}
+.plan-actions{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap}
+.recipe-picker{border:0.5px solid var(--bd);border-radius:var(--r-md);max-height:200px;overflow-y:auto;background:var(--bg);-webkit-overflow-scrolling:touch}
+.recipe-pick-item{padding:10px 12px;font-size:13px;cursor:pointer;border-bottom:0.5px solid var(--bd)}
+.recipe-pick-item:active{background:var(--bg2)}
+.recipe-pick-item:last-child{border-bottom:none}
+.pull-btn{display:flex;align-items:center;gap:6px;padding:8px 14px;border-radius:var(--r-md);border:0.5px solid var(--bd);background:var(--bg);cursor:pointer;font-size:12px;color:var(--t2);font-family:var(--font);transition:all 0.15s;margin-bottom:12px}
+.pull-btn:active{background:var(--bg2)}
+.history-week{margin-bottom:16px}
+.history-week-header{font-size:12px;font-weight:500;color:var(--t3);text-transform:uppercase;letter-spacing:0.3px;margin-bottom:6px;padding-bottom:4px;border-bottom:0.5px solid var(--bd)}
+.history-day{font-size:13px;padding:4px 0;color:var(--t2);display:flex;gap:6px}
+.history-day .hd-name{font-weight:500;min-width:30px;color:var(--t3);font-size:12px}
+.week-nav{display:flex;align-items:center;gap:4px}
+.week-nav button{background:none;border:none;cursor:pointer;padding:4px;color:var(--t2);display:flex;align-items:center}
+.week-nav span{font-size:12px;min-width:100px;text-align:center}
+.grocery-edit-input{border:none;background:transparent;font-size:14px;color:var(--t1);outline:none;font-family:var(--font);width:100%;padding:0}
+.suggestions{margin-bottom:14px}
+.suggestions-label{font-size:11px;color:var(--t3);margin-bottom:6px;font-weight:500;text-transform:uppercase;letter-spacing:0.3px}
+.sug-chips{display:flex;gap:6px;flex-wrap:wrap}
+.sug-chip{padding:6px 12px;border-radius:16px;font-size:12px;border:0.5px solid var(--acc);color:var(--acc-dark);background:var(--acc-light);cursor:pointer;transition:all 0.15s;font-family:var(--font);display:flex;align-items:center;gap:4px}
+.sug-chip:active{background:var(--acc);color:white}
+.randomizer{text-align:center;padding:20px 16px;margin-bottom:16px;border:0.5px solid var(--bd);border-radius:var(--r-lg);background:var(--bg2)}
+.randomizer-result{font-family:'Instrument Serif',serif;font-size:24px;margin:12px 0 4px;min-height:34px;transition:opacity 0.2s}
+.randomizer-sub{font-size:12px;color:var(--t3);margin-bottom:2px}
+.spin-btn{padding:10px 28px;border-radius:var(--r-md);font-size:14px;font-weight:500;cursor:pointer;border:none;background:var(--acc);color:white;font-family:var(--font);margin-top:10px}
+.spin-btn:active{transform:scale(0.97)}
+.spinning .randomizer-result{animation:slotSpin 0.1s infinite}
+@keyframes slotSpin{0%{opacity:1}50%{opacity:0.3}100%{opacity:1}}
+.use-meal-btn{padding:7px 16px;border-radius:var(--r-md);font-size:12px;cursor:pointer;border:0.5px solid var(--acc);color:var(--acc-dark);background:var(--acc-light);font-family:var(--font);margin-top:8px}
+.season-hint{font-size:11px;color:var(--acc-dark);background:var(--acc-light);padding:3px 10px;border-radius:10px;margin-top:6px;display:inline-block}
+.loading-screen{display:flex;align-items:center;justify-content:center;min-height:60vh;color:var(--t3);font-size:14px}
+.sync-dot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-left:6px}
+.sync-dot.online{background:var(--acc)}
+.sync-dot.offline{background:#E24B4A}
+</style>
+</head>
+<body>
+<div id="root"><div class="loading-screen">Loading Chef's Touch...</div></div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script>
+const PREPOPULATED_HISTORY = {"2026-03-09":{"6":"corned beef w/ cabbage, potatoes, carrots","0":"chicken tenders & fries","1":"corned beef w/ cabbage, potatoes, carrots","2":"eat w/ fam or takeout","3":"pierogis","4":"bowling & pizza w/ fam"},"2026-03-02":{"5":"Lookout House","6":"homemade pizza w/ pepperoni","0":"buffalo chicken cheesesteaks w/fries","1":"beef tacos","2":"BBQ chicken w potatoes & carrots or takeout","3":"pierogis","4":"Grotto & hockey game w/ fam"},"2026-02-23":{"5":"go out","6":"beef roast w/ potatoes & carrots","0":"chicken bites & sweet potato fries","1":"enchiladas","2":"eat w/ fam or takeout","3":"salmon w/ rice, green beans & corn","4":"pizza night/take out/date night"},"2026-02-16":{"5":"eat w/ Mom & Dad","6":"chili","0":"raviolis & meatballs w/ bread","1":"chicken burrito bowls","2":"eat w/ fam or takeout","3":"mac & cheese w/ stewed tomatoes","4":"pizza night/take out/date night"},"2026-02-09":{"5":"Valentine's Day (Rikasa)","6":"pasta w/ alfredo sauce & chicken w/ cesar salad","0":"seasoned/marinated chicken w/ rice & spinach","1":"take out","2":"eat w/ fam or takeout","3":"BLT sandwiches w/ fries","4":"pizza night/take out/date night"},"2026-02-02":{"5":"lasagna w/ Texas toast","6":"buffalo chicken sandwiches & crack corn dip","0":"piggy soup","1":"Applebee's or pizza w/ Sophia","2":"eat w/ Mom Racho or takeout","3":"marinated chicken w/ carrots & skinless potatoes","4":"pizza night/take out/date night"},"2026-01-26":{"6":"mac & cheese & mini tacos","0":"roast beef melts w/ fries","1":"dinner w/ Mom","2":"eat w/ Mom Racho or takeout","3":"chicken roasted w/ potatoes spinach & carrots","4":"pizza night/take out/date night"},"2026-01-19":{"5":"Holly's Birthday Party","6":"creamy crockpot chicken chili","0":"ravioli w/ meatballs & texas toast","1":"taco bowls","2":"eat w/ Mom Racho or takeout","3":"BBQ chicken salad","4":"pizza night/take out/date night"},"2026-01-12":{"5":"mac & cheese w/ stewed tomatoes","6":"Cuz n' Joes","0":"potato soup","1":"Red's w/ Mom & Dad","2":"dinner w/ Mom Racho or takeout","3":"ravioli w/ meatballs","4":"pizza night/take out/date night"},"2026-01-05":{"6":"chicken bites w/ fries","0":"onion/mushroom grilled cheese w/ sliced oven potatoes","1":"fajita in a bowl","2":"eat w/ Mom Racho or take out","3":"rigatoni w/ meatballs & vodka sauce","4":"Pop's dinner @ Rustic Kitchen"},"2025-12-29":{"0":"steak hoagies w/ horseradish sauce & fries &/or french onion soup","1":"taco bowls","2":"eat w/ Mom Racho or takeout","3":"meatballs w/ bread","4":"pizza"},"2025-12-22":{"0":"Fratelli's","1":"taco bowls","2":"NYE","3":"New Year's Day / pork & sauerkraut & raviolis at Mom & Dad's","4":"NYE dinner"},"2025-12-15":{"0":"buffalo chicken sliders w/ fries","1":"tacos","2":"Christmas Eve","3":"Christmas Day","4":"pizza or take out"},"2025-12-08":{"0":"enchiladas","1":"take out","2":"eat w/ Mom Racho or takeout","3":"pierogis","4":"Scotch Valley"},"2025-12-01":{"0":"minestrone w/ bread","1":"enchiladas w/ Spanish rice","2":"eat w/ Mom Racho or takeout","3":"eat out","4":"pizza"},"2025-11-24":{"0":"slow cooker pot roast","1":"tacos","2":"eat w/ Mom Racho or takeout","3":"pasta w/ sauce","4":"Knobeles"},"2025-11-17":{"0":"broccoli cheddar soup w/ bread","1":"tacos","2":"grilled cheese & tomato soup","3":"Thanksgiving","4":"pizza or go out"},"2025-11-10":{"0":"BBQ chicken w/ roasted potatoes & carrots","1":"steak fajitas w/ peppers & onions & rice","2":"eat w/ Mom Racho or go out","3":"mac & cheese w/ stewed tomatoes","4":"pizza night or go out"},"2025-11-03":{"0":"lasagna & garlic bread","1":"chicken taco bowls","2":"eat w/ Mom Racho or take out","3":"BBQ chicken w/ roasted potatoes & carrots","4":"pizza night or go out"},"2025-10-27":{"0":"gnocchi soup","1":"chicken taco bowls","2":"eat w/ Mom Racho or take out","3":"chicken thighs w/ white rice and vegetables","4":"pizza night or go out to dinner"},"2025-10-20":{"0":"roast beef sandwiches w/ fries","1":"taco bowls","2":"eat w/ Mom Racho or take out","3":"sheet pan chicken sausage w/ veggies","4":"Halloween pizza night"},"2025-10-13":{"0":"chicken tenders w/ fries","1":"tacos","2":"eat w/ Mom Racho or takeout","4":"pizza night"},"2025-10-06":{"0":"Sophia's B-day dinner","1":"chicken tortilla soup","2":"eat w/ Mom Racho or takeout","3":"steak w/ wine sauce, mushrooms, carrots, & baked potato","4":"pizza night or Knoebels"},"2025-09-29":{"0":"stuffed peppers","1":"enchiladas","2":"eat w/ Mom Racho or takeout","3":"pierogis","4":"pizza night or go out"},"2025-09-22":{"0":"grilled chicken salad","1":"taco bowls","2":"dinner w/ Mom Racho or takeout","3":"steak & cheese sandwich w/ fries","4":"pizza night"},"2025-09-15":{"0":"burgers w/ fries or Bloomsburg Fair","1":"chicken tortilla soup","2":"dinner w/ Mom Racho or takeout","3":"ravioli","4":"fair"},"2025-09-08":{"0":"BBQ chicken w/ corn on the cob & potatoes","1":"chicken tacos bowls","2":"buffalo chicken sandwiches in crockpot","3":"cheeseburgers w/ fries","4":"pizza"},"2025-09-01":{"0":"Top of the 80's","1":"Evan's birthday dinner w/ Dad","2":"BLT's w/ fries","3":"Rikasa @ 7:00","4":"pizza"},"2025-08-25":{"0":"steak w/ gorgonzola & potatoes & corn","1":"southwest salad w/ chicken","2":"dinner w/ Mom Racho or takeout","3":"leave for Wildwood"},"2025-08-18":{"0":"chicken bites w/ cucumber salad & corn","1":"Fratelli's w/ Mom Racho","2":"Birthday dinner @ Anthony's","3":"hot dogs w/ pasta salad","4":"go out or pizza at Grandmom's"},"2025-08-11":{"0":"gyros","1":"steal your plate @ HHW","2":"dinner w/ Mom Racho or takeout","3":"BBQ chicken sandwiches in slow cooker/Party on the Patio","4":"Pittston Tomato Festival"},"2025-08-04":{"0":"chicken, corn on the cob, vegetables & twice baked potato","1":"tacos","2":"dinner w/ Mom Racho or takeout","3":"steak & seafood, corn on the cob & potatoes","4":"pizza night"},"2025-07-28":{"0":"sausage & peppers","1":"tacos","2":"takeout","3":"pierogis","4":"dinner w/ Mom & Dad"},"2025-07-21":{"0":"ravioli w/ caesar salad","1":"taco bowls","2":"eat w/ Mom Racho or take out","3":"fried chicken sandwich w/ bacon honey mustard and swiss"},"2025-07-14":{"0":"BBQ chicken sliders","1":"crunch wraps","2":"eat w/ Mom Racho or take out","3":"ravioli w/ caesar salad","4":"pizza night"},"2025-07-07":{"0":"BLT sandwiches w/ fries","1":"creamy lemon herb chicken w/ orzo salad","2":"BBQ chicken sandwiches in crockpot"},"2025-06-30":{"0":"buffalo chicken cheesesteaks w/ fries","1":"southwest salad w/ grilled chicken","2":"dinner w/ Mom Racho or takeout","3":"creamy lemon herb chicken w/ orzo salad","4":"pizza"},"2025-06-23":{"0":"BBQ chicken w/ carrots & roasted potatoes","1":"chicken tacos","2":"dinner w/ Mom Racho or takeout","3":"Meating Wagon or eat w/ the Hockenberry's","4":"pizza"},"2025-06-16":{"0":"sausage & peppers","1":"chicken tacos","2":"dinner w/ Mom Racho or takeout","3":"sun dried tomato pasta","4":"pizza"},"2025-06-09":{"0":"cheeseburgers w/ fries","1":"tacos","2":"Dante's Inferno","3":"grilled chicken w/ lemon orzo","4":"pizza"},"2025-06-02":{"0":"ribs w/ mac & cheese","1":"fiesta lime chicken w/ rice","2":"dinner w/ Momma Racho or takeout","3":"manicotti w/ caesar salad","4":"pizza"},"2025-05-26":{"0":"sausage & peppers w/ sauce","1":"quesadillas","2":"dinner w/ Mom Racho or takeout out","3":"roast beef sandwiches","4":"pizza"},"2025-05-19":{"0":"bay scallop scampi","1":"chicken quesadillas","2":"dinner w/ Mom Racho or takeout","3":"chicken bites with tomato cucumber salad","4":"pizza"},"2025-05-12":{"0":"chicken tacos","1":"sausage & peppers","2":"dinner w/ Mom Racho or takeout","3":"BBQ chicken w/ carrots & potatoes","4":"pizza night"},"2025-05-05":{"0":"lemon garlic butter haddock w/ rice & carrots","1":"shrimp tacos","2":"dinner w/ Mom Racho or takeout","3":"sausage & peppers","4":"pizza night"},"2025-04-28":{"0":"lemon garlic butter haddock w/ rice & green beans","1":"southwest salad w/ grilled chicken","2":"dinner w Mom Racho or takeout","3":"BBQ chicken w/ green beans & potatoes","4":"pizza night or takeout"},"2025-04-21":{"0":"cheeseburgers w/ tomato & cucumber salad","1":"tacos & taco salad","2":"dinner w/ Mom Racho or takeout","3":"bay scallop scampi"},"2025-04-14":{"0":"buffalo chicken sandwiches","1":"chicken tortilla soup","2":"dinner w/ Mom Racho or takeout","3":"chicken caesar salad","4":"pizza night"},"2025-04-07":{"0":"chicken quesadillas","1":"creamy bay scallop spaghetti","2":"dinner w/ Mom Racho or takeout","3":"BBQ chicken w carrots & roasted potatoes","4":"Pittsburgh"},"2025-03-31":{"0":"creamy bay scallop spaghetti","1":"chicken tacos","2":"dinner w/ Mom Racho or takeout","3":"boneless bites w/ fries & salad","4":"pizza night or fish"},"2025-03-24":{"5":"Kaci's pick","6":"corn beef & cabbage","0":"roast beef sandwiches","1":"chicken tacos","2":"dinner w/ Mom Racho or takeout","3":"BBQ chicken, carrots &","4":"pizza night or fish"},"2025-03-17":{"0":"BBQ bacon cheeseburgers w/ fries","1":"fajitas at Cuz n' Joes","2":"stir fry","3":"scallops w/ rice & carrots"},"2025-03-10":{"0":"creamy mushroom chicken","1":"faijtas at Cuz n' Joes","2":"mac & cheese w/ stewed tomatoes","3":"lobster/steaks w/ baked potato & carrots","4":"pizza night"},"2025-03-03":{"0":"BBQ chicken w/ corn casserole & roasted potatoes","1":"steak fajitas","2":"mac & cheese w/ stewed tomatoes","3":"Rose Marie's","4":"Holly's Benefit"},"2025-02-24":{"0":"coconut lime chicken w/ rice & green beans","1":"taco bowls","2":"dinner w/ Mom Racho or takeout","3":"BBQ pork w/ fries","4":"pizza night"},"2025-02-17":{"0":"meatball sandwiches","1":"chicken fajitas","2":"eat w/ Mom Racho or takeout","3":"coconut lime chicken w/ rice & vegetable","4":"Valentine's Day"},"2025-02-10":{"0":"chicken tenders w/ carrots & roasted potatoes","1":"tacos","2":"eat w/ Mom Racho or takeout","3":"white fish, carrots, rice","4":"pizza night"},"2025-02-03":{"0":"scallops w/ rice & balsamic glaze brussel sprouts","1":"Mexican manicotti","2":"eat w/ Mom Racho","3":"stuffed peppers","4":"pizza"},"2025-01-27":{"0":"BBQ chicken w/ corn & sweet potato fries","1":"tacos/taco salad","2":"eat w/ Mom Racho","3":"steak w/ caesar salad & roasted potatoes","4":"pizza night"},"2025-01-20":{"0":"mac and cheese w/ stewed tomatoes","1":"chicken quesadillas","2":"eat w/ Mom Racho or takeout","3":"ravioli w/ garlic bread","4":"pizza night"},"2025-01-13":{"0":"buffalo chicken sandwiches","1":"Scotch Valley tacos","2":"eat w/ Mom Racho","3":"steak w/ baked potato & corn","4":"pizza night @ grandmom's"},"2025-01-06":{"0":"grilled cheese & tomato soup","1":"NYE","2":"New Year's Day","3":"manicotti w/ salad & bread","4":"pizza night @ grandmom's"},"2024-12-30":{"0":"BBQ chicken w/ mac & cheese","1":"Christmas Eve","2":"Christmas Day","3":"tacos","4":"Rustic Kitchen"},"2024-12-23":{"0":"BBQ chicken w/ corn casserole & baked potato","1":"tacos","2":"eat w/ Mom Racho","3":"steak, mashed potatoes & brussel sprouts","4":"pizza night @ Grandmom's"},"2024-12-16":{"0":"chicken soup","1":"chicken quesadillas","2":"eat w/ Mom Racho","3":"mac & cheese w/ stewed tomatoes"},"2024-12-09":{"0":"fiesta lime chicken","1":"ham","2":"eat w/ Mom Racho","3":"sausage and peppers","4":"pizza night @ Grandmom's & DiMaggio's"},"2024-12-02":{"0":"take out","1":"white chicken chili","2":"BBQ chicken w/ mac & cheese","3":"Thanksgiving","4":"pizza night @ Carol & Matt's or Hockey game"},"2024-11-25":{"0":"open face sausage sandwiches","1":"chicken tortilla soup","2":"dinner w/ Mom Racho","3":"take out","4":"pizza w/ Grandmom"},"2024-11-18":{"0":"chicken sandwiches w/ waffle fries","1":"tacos","2":"eat w/ Mom Racho","3":"wings @ Scotch Valley","4":"pizza @ Grandmom's"},"2024-11-11":{"0":"BBQ chicken w/ corn bread","1":"taco bowls w/ chicken","2":"eat w/ Mom Racho","3":"boneless bites w/ wing sauce","4":"Night @ the Races"},"2024-11-04":{"0":"breakfast","1":"Scotch Valley for tacos","2":"eat w/ Mom Racho","3":"nachos"},"2024-10-28":{"0":"buffalo chicken mac & cheese","1":"Scotch Valley for tacos","2":"steak, potato & carrots","3":"creamy tortellini soup"},"2024-10-21":{"0":"buffalo chicken hoagie","1":"chili w/ no beans","2":"Revellos","3":"lasagna"},"2024-10-14":{"0":"french bread pizzas","1":"Scotch Valley for tacos","2":"eat w/ Mom Racho","3":"chicken tortilla soup","4":"Morgan's wedding"},"2024-10-07":{"0":"grilled chicken salad","1":"fair","2":"Sophia's birthday","3":"fair with Momma Racho","4":"pizza"},"2024-09-30":{"0":"BBQ bacon burgers","1":"chicken tacos","2":"eat w/ Mom Racho"},"2024-09-23":{"0":"Turkey Hill Brew Pub","1":"Powerhouse","2":"Rustic Kitchen","3":"BBQ bacon cheeseburgers & sweet potato fries"},"2024-09-16":{"0":"steaks w/ Aunt Elaine","1":"quesadillas","2":"eat w/ Mom Racho","3":"fish w/ baked potatoes & corn on the cob"},"2024-09-09":{"6":"chicken fingers and french fries","0":"cheeseburgers & chips","1":"BIRTHDAY DINNER","2":"eat w/ Mom Racho","3":"steaks, mushrooms, potatoes & corn on the cob"},"2024-09-02":{"0":"lemon garlic shrimp","1":"tacos/taco salad","2":"eat w/ Mom Racho","3":"cheeseburgers w/ tomato salad"},"2024-08-26":{"0":"caprese chicken w cucumber salad","1":"steaks w/ mushrooms, corn & potatoes","2":"eat w/ Mom Racho","3":"tacos"},"2024-08-19":{"0":"steaks w/ potatoes & mushrooms","1":"NNO","2":"eat w/ Mom Racho","3":"sausage & peppers in sauce"},"2024-08-12":{"0":"burgers & fresh cut fries","1":"chicken tacos","2":"BBQ pork sandwich","3":"shrimp w/ med orzo","4":"slow cooker meatballs"},"2024-08-05":{"0":"grilled chicken w/ med. orzo","1":"shrimp tacos","2":"sausage and peppers","3":"fish w/ carrots & potatoes"},"2024-07-29":{"0":"BBQ chicken salad","1":"shrimp tacos","2":"turkey burgers & cheeseburgers w/ mushrooms & avocado salad","3":"steak w/ roasted potatoes & carrots"},"2024-07-22":{"0":"chicken w cucumber & tomato salad","1":"beef tenderloin and lobster w/ roasted potatoes & salad","2":"angel hair pasta w/ shrimp","3":"turkey burgers & cheeseburgers w/ sweet potato fries"},"2024-07-15":{"0":"sheet pan sausage & peppers","1":"taco bowls","2":"cheese burgers","3":"BBQ chicken salad"},"2024-07-08":{"0":"sweet and sour meatballs","1":"tacos/taco salad","2":"bacon burgers","3":"grilled chicken & vegetables"},"2024-07-01":{"0":"leftovers or eat out","1":"shrimp tacos","2":"grilled chicken & vegetables/potatoes","3":"sun dried tomato pasta"},"2024-06-24":{"0":"sheet pan sausage and peppers","1":"shrimp tacos","2":"steak w/ sweet potatoes & vegetable","3":"fish w/ asparagus & roasted potatoes"},"2024-06-17":{"0":"cheeseburgers","1":"enchiladas","2":"Philly cheesesteak sloppy joes","3":"sheet pan sausage and peppers"},"2024-06-10":{"0":"ribs, mashed potatoes & corn","1":"chicken bowls","2":"coconut lime chicken & rice","3":"steak, spinach, potatoes"},"2024-06-03":{"0":"stuffed pepper w/ ground turkey","1":"shrimp tacos","2":"BBQ chicken salad","3":"smash burgers"},"2024-05-27":{"0":"scallops with carrots & rice/cauliflower rice","1":"tacos/ taco salad","2":"steak, sweet potatoes & green beans","3":"chicken w/ tomato and mozzarella"},"2024-05-20":{"0":"haddock, sweet potatoes & spinach","1":"taco salad","2":"chicken, broccoli & sweet potatoes","3":"garlic butter shrimp & asparagus"},"2024-05-13":{"0":"BBQ chicken salad","1":"taco bowls","2":"pierogies & kielbasa","3":"steak, asparagus & potatoes"},"2024-05-06":{"0":"fiesta lime chicken","1":"Blackstone crunch wraps","2":"sausage and peppers","3":"chicken alfredo"},"2024-04-29":{"0":"cheese steaks","1":"sheet pain chicken fajitas","2":"cheeseburgers and fries","3":"scallops w/ rice & balsamic glaze brussel sprouts & bacon bits"},"2024-04-22":{"0":"manicotti w/ salad & bread","1":"quesadillas","2":"cheese steaks"},"2024-04-15":{"0":"smash burgers w/ sweet potato fries & cucumber tomato salad","1":"taco bowls","2":"manicotti"},"2024-04-08":{"0":"fiesta lime chicken","1":"Carol's birthday dinner","2":"tacos","3":"creamy tuscan gnocchi"},"2024-04-01":{"0":"sheet pan sausage & peppers","1":"taco salad","2":"ribs w/ mashed potatoes","3":"creamy tuscan gnocchi"},"2024-03-25":{"0":"lemon shrimp orzo","1":"chicken fajitas","2":"Damenti's","3":"stir fry"},"2024-03-18":{"0":"BBQ chicken salad","1":"taco bowls","2":"chicken tenders & fries","3":"lemon shrimp orzo"},"2024-03-11":{"0":"coconut lime chicken w/ rice","1":"quesadillas","2":"white wine pasta with mushrooms & leeks","3":"garlic lemon baked tilapia w/ asparagus & rice"}};
+
+// Firebase config
+firebase.initializeApp({
+  apiKey: "AIzaSyCzkARNjWOhfkGEmNGmZdoDzfeFCQ4Qs8k",
+  authDomain: "chefstouch-app.firebaseapp.com",
+  projectId: "chefstouch-app",
+  storageBucket: "chefstouch-app.firebasestorage.app",
+  messagingSenderId: "793919463622",
+  appId: "1:793919463622:web:0a177f0cb018d0887077c7"
+});
+const db = firebase.firestore();
+db.enablePersistence().catch(()=>{});
+
+// Firestore helpers
+async function fsGet(col,doc){try{const s=await db.collection(col).doc(doc).get();return s.exists?s.data().value:null}catch(e){return null}}
+async function fsSet(col,doc,value){try{await db.collection(col).doc(doc).set({value,updatedAt:firebase.firestore.FieldValue.serverTimestamp()})}catch(e){}}
+function fsListen(col,doc,cb){return db.collection(col).doc(doc).onSnapshot(s=>{if(s.exists)cb(s.data().value)})}
+
+const{useState,useEffect,useCallback,useRef,useMemo}=React;
+const e=React.createElement;
+
+const EM={'breakfast':'\u{1F373}','dinner':'\u{1F355}','dessert':'\u{1F370}','soup':'\u{1F372}','salad':'\u{1F957}','pasta':'\u{1F35D}','seafood':'\u{1F990}','meat':'\u{1F356}','chicken':'\u{1F357}','vegetarian':'\u{1F966}','asian':'\u{1F961}','mexican':'\u{1F32E}','italian':'\u{1F35D}','bbq':'\u{1F356}','baking':'\u{1F9C1}','default':'\u{1F374}'};
+function gE(tags,title){const a=[...(tags||[]),title||''].join(' ').toLowerCase();for(const[k,v]of Object.entries(EM))if(a.includes(k))return v;return EM.default}
+const DS=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'],DF=['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
+function getWS(d){const x=new Date(d);const day=x.getDay();x.setDate(x.getDate()-day+(day===0?-6:1));x.setHours(0,0,0,0);return x}
+function fWR(s){const end=new Date(s);end.setDate(end.getDate()+6);const f=d=>d.toLocaleDateString('en-US',{month:'short',day:'numeric'});return f(s)+' \u2013 '+f(end)}
+function wk(d){return getWS(d).toISOString().slice(0,10)}
+
+// Holiday awareness
+function getHolidays(year){
+  const holidays={};
+  holidays[`${year}-01-01`]="New Year's Day";
+  holidays[`${year}-02-14`]="Valentine's Day";
+  holidays[`${year}-03-17`]="St. Patrick's Day";
+  holidays[`${year}-07-04`]="4th of July";
+  holidays[`${year}-10-31`]="Halloween";
+  holidays[`${year}-12-24`]="Christmas Eve";
+  holidays[`${year}-12-25`]="Christmas Day";
+  holidays[`${year}-12-31`]="New Year's Eve";
+  // Thanksgiving (4th Thursday of November)
+  let nov1=new Date(year,10,1);let d=nov1.getDay();let first_thu=d<=4?1+(4-d):1+(11-d);
+  holidays[`${year}-11-${String(first_thu+21).padStart(2,'0')}`]="Thanksgiving";
+  // Easter (approximate - Computus algorithm)
+  const a=year%19,b=Math.floor(year/100),c=year%100,dd=Math.floor(b/4),ee=b%4;
+  const f=Math.floor((b+8)/25),g=Math.floor((b-f+1)/3),h=(19*a+b-dd-g+15)%30;
+  const i=Math.floor(c/4),k=c%4,l=(32+2*ee+2*i-h-k)%7;
+  const m=Math.floor((a+11*h+22*l)/451),month=Math.floor((h+l-7*m+114)/31),day=(h+l-7*m+114)%31+1;
+  holidays[`${year}-${String(month).padStart(2,'0')}-${String(day).padStart(2,'0')}`]="Easter";
+  return holidays;
+}
+function getSeason(month){if(month>=3&&month<=5)return'spring';if(month>=6&&month<=8)return'summer';if(month>=9&&month<=11)return'fall';return'winter'}
+function getSeasonalHint(){
+  const now=new Date();const m=now.getMonth();const s=getSeason(m);
+  const holidays={...getHolidays(now.getFullYear()),...getHolidays(now.getFullYear()+1)};
+  const today=now.toISOString().slice(0,10);
+  // Check if a holiday is within 5 days
+  for(let i=0;i<5;i++){
+    const check=new Date(now);check.setDate(check.getDate()+i);
+    const key=check.toISOString().slice(0,10);
+    if(holidays[key])return{holiday:holidays[key],season:s};
+  }
+  return{holiday:null,season:s};
+}
+function isSeasonalMeal(meal,season){
+  const m=meal.toLowerCase();
+  if(season==='summer')return['salad','grill','bbq','corn on the cob','burger','taco','shrimp'].some(k=>m.includes(k));
+  if(season==='winter')return['soup','chili','roast','stew','pot roast','lasagna'].some(k=>m.includes(k));
+  if(season==='fall')return['soup','chili','roast','stew','stuffed pepper'].some(k=>m.includes(k));
+  return true;
+}
+function isHolidayMeal(meal,holiday){
+  const m=meal.toLowerCase();
+  if(!holiday)return false;
+  const h=holiday.toLowerCase();
+  if(h.includes('patrick'))return m.includes('corned beef')||m.includes('corn beef');
+  if(h.includes('thanksgiving'))return m.includes('turkey');
+  return false;
+}
+
+const SAM=[
+  {id:'1',title:'Classic Margherita Pizza',tags:['dinner','italian'],prepTime:20,cookTime:15,servings:4,ingredients:['2 cups bread flour','1 tsp active dry yeast','3/4 cup warm water','1 tsp salt','1 tbsp olive oil','1/2 cup tomato sauce','8 oz fresh mozzarella','Fresh basil leaves'],steps:['Combine flour, yeast, water, salt, oil. Knead 8 min.','Rise 1 hour.','Preheat 500\u00B0F.','Stretch to 12 inches.','Sauce + mozzarella.','Bake 10-12 min.','Basil, serve.'],sourceUrl:'',notes:'',favEvan:false,favKara:false,createdAt:Date.now()},
+  {id:'2',title:'Honey Garlic Salmon',tags:['dinner','seafood'],prepTime:10,cookTime:15,servings:2,ingredients:['2 salmon fillets','3 tbsp honey','2 tbsp soy sauce','4 cloves garlic, minced','1 tbsp olive oil','1 lemon, juiced','Salt and pepper'],steps:['Mix honey, soy, garlic, lemon.','Season salmon.','Sear 3 min.','Flip, pour glaze.','Oven 400\u00B0F 8-10 min.','Serve.'],sourceUrl:'',notes:'Great with rice',favEvan:true,favKara:false,createdAt:Date.now()-86400000},
+  {id:'3',title:'Overnight Oats',tags:['breakfast','vegetarian'],prepTime:5,cookTime:0,servings:1,ingredients:['1/2 cup rolled oats','1/2 cup milk','1/4 cup Greek yogurt','1 tbsp chia seeds','1 tbsp maple syrup','Berries'],steps:['Combine all in jar.','Refrigerate overnight.','Top with berries.'],sourceUrl:'',notes:'',favEvan:false,favKara:true,createdAt:Date.now()-172800000}
+];
+
+const IC={
+  search:e('svg',{width:15,height:15,viewBox:'0 0 24 24',fill:'none',stroke:'currentColor',strokeWidth:2},e('circle',{cx:11,cy:11,r:8}),e('path',{d:'M21 21l-4.35-4.35'})),
+  back:e('svg',{width:15,height:15,viewBox:'0 0 24 24',fill:'none',stroke:'currentColor',strokeWidth:2},e('path',{d:'M19 12H5M12 19l-7-7 7-7'})),
+  plus:e('svg',{width:20,height:20,viewBox:'0 0 24 24',fill:'none',stroke:'currentColor',strokeWidth:2.5},e('path',{d:'M12 5v14M5 12h14'})),
+  clock:e('svg',{width:13,height:13,viewBox:'0 0 24 24',fill:'none',stroke:'currentColor',strokeWidth:2},e('circle',{cx:12,cy:12,r:10}),e('path',{d:'M12 6v6l4 2'})),
+  ppl:e('svg',{width:13,height:13,viewBox:'0 0 24 24',fill:'none',stroke:'currentColor',strokeWidth:2},e('path',{d:'M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2'}),e('circle',{cx:9,cy:7,r:4})),
+  link:e('svg',{width:13,height:13,viewBox:'0 0 24 24',fill:'none',stroke:'currentColor',strokeWidth:2},e('path',{d:'M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71'}),e('path',{d:'M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71'})),
+  x:e('svg',{width:15,height:15,viewBox:'0 0 24 24',fill:'none',stroke:'currentColor',strokeWidth:2},e('path',{d:'M18 6L6 18M6 6l12 12'})),
+  copy:e('svg',{width:14,height:14,viewBox:'0 0 24 24',fill:'none',stroke:'currentColor',strokeWidth:2},e('rect',{x:9,y:9,width:13,height:13,rx:2}),e('path',{d:'M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1'})),
+  book:e('svg',{width:22,height:22,viewBox:'0 0 24 24',fill:'none',stroke:'currentColor',strokeWidth:1.8},e('path',{d:'M4 19.5A2.5 2.5 0 0 1 6.5 17H20'}),e('path',{d:'M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z'})),
+  cal:e('svg',{width:22,height:22,viewBox:'0 0 24 24',fill:'none',stroke:'currentColor',strokeWidth:1.8},e('rect',{x:3,y:4,width:18,height:18,rx:2}),e('path',{d:'M16 2v4M8 2v4M3 10h18'})),
+  cart:e('svg',{width:22,height:22,viewBox:'0 0 24 24',fill:'none',stroke:'currentColor',strokeWidth:1.8},e('path',{d:'M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z'}),e('path',{d:'M3 6h18'}),e('path',{d:'M16 10a4 4 0 0 1-8 0'})),
+  hist:e('svg',{width:22,height:22,viewBox:'0 0 24 24',fill:'none',stroke:'currentColor',strokeWidth:1.8},e('path',{d:'M12 8v4l3 3'}),e('circle',{cx:12,cy:12,r:10})),
+  chL:e('svg',{width:14,height:14,viewBox:'0 0 24 24',fill:'none',stroke:'currentColor',strokeWidth:2.5},e('path',{d:'M15 18l-6-6 6-6'})),
+  chR:e('svg',{width:14,height:14,viewBox:'0 0 24 24',fill:'none',stroke:'currentColor',strokeWidth:2.5},e('path',{d:'M9 18l6-6-6-6'})),
+  chev:e('svg',{width:11,height:11,viewBox:'0 0 24 24',fill:'none',stroke:'currentColor',strokeWidth:2.5},e('path',{d:'M9 18l6-6-6-6'})),
+};
+
+function parseHTML(html,url){const p=new DOMParser();const doc=p.parseFromString(html,'text/html');let r={title:'',ingredients:[],steps:[],prepTime:0,cookTime:0,servings:4,tags:[],sourceUrl:url,notes:''};const scripts=doc.querySelectorAll('script[type="application/ld+json"]');for(const s of scripts){try{let d=JSON.parse(s.textContent);if(Array.isArray(d))d=d.find(x=>x['@type']==='Recipe')||d[0];if(d['@graph'])d=d['@graph'].find(x=>x['@type']==='Recipe')||d;if(d['@type']==='Recipe'||(Array.isArray(d['@type'])&&d['@type'].includes('Recipe'))){r.title=d.name||'';r.ingredients=(d.recipeIngredient||[]).map(i=>i.trim());if(d.recipeInstructions){if(typeof d.recipeInstructions==='string')r.steps=d.recipeInstructions.split(/\n/).filter(Boolean);else if(Array.isArray(d.recipeInstructions))r.steps=d.recipeInstructions.map(x=>{if(typeof x==='string')return x.trim();if(x.text)return x.text.trim();if(x['@type']==='HowToSection'&&x.itemListElement)return x.itemListElement.map(i=>typeof i==='string'?i:i.text||'').join(' ');return''}).filter(Boolean)}const pd=x=>{if(!x)return 0;return(parseInt((x.match(/(\d+)H/)||[])[1]||0))*60+parseInt((x.match(/(\d+)M/)||[])[1]||0)};r.prepTime=pd(d.prepTime);r.cookTime=pd(d.cookTime);if(d.recipeYield){const y=Array.isArray(d.recipeYield)?d.recipeYield[0]:d.recipeYield;r.servings=parseInt(y)||4}if(d.recipeCategory){const c=Array.isArray(d.recipeCategory)?d.recipeCategory:[d.recipeCategory];r.tags=c.map(x=>x.toLowerCase().trim()).slice(0,3)}return r}}catch(e){}}r.title=(doc.querySelector('h1')||{}).textContent||'Imported Recipe';return r}
+
+function getSuggestions(groceryLog){
+  if(!groceryLog||groceryLog.length<3)return[];
+  const counts={};
+  groceryLog.forEach(entry=>{if(!entry.items)return;entry.items.forEach(item=>{const k=item.toLowerCase().trim();if(!counts[k])counts[k]={total:0,timestamps:[],name:item};counts[k].total++;counts[k].timestamps.push(entry.ts)})});
+  const fourWeeks=Date.now()-28*86400000;
+  const suggestions=[];
+  Object.entries(counts).forEach(([k,v])=>{if(v.total>=3&&v.timestamps.filter(t=>t>fourWeeks).length>=2)suggestions.push({name:v.name,count:v.total})});
+  return suggestions.sort((a,b)=>b.count-a.count).slice(0,8);
+}
+
+function getMealPool(mealPlan){
+  if(!mealPlan)return[];
+  const meals={};const skip=['takeout','take out','go out','eat w/','eat w ','pizza night','date night','christmas','thanksgiving','nye','new year','birthday','halloween','valentine','easter','fair','wedding','benefit','party','hockey','races','bowling'];
+  Object.entries(mealPlan).forEach(([weekKey,week])=>{
+    const weekDate=new Date(weekKey+'T00:00:00');
+    Object.values(week).forEach(meal=>{
+      if(!meal)return;const m=meal.trim();const lower=m.toLowerCase();
+      if(skip.some(x=>lower.includes(x)))return;
+      if(lower.length<4)return;
+      if(!meals[lower])meals[lower]={name:m,count:0,lastDate:weekDate};
+      meals[lower].count++;
+      if(weekDate>meals[lower].lastDate)meals[lower].lastDate=weekDate;
+    });
+  });
+  return Object.values(meals).filter(m=>m.count>=1).sort((a,b)=>b.count-a.count);
+}
+
+function App(){
+  const[recipes,setRecipes]=useState(null);
+  const[tab,setTab]=useState('recipes');
+  const[view,setView]=useState('list');
+  const[selectedId,setSelectedId]=useState(null);
+  const[search,setSearch]=useState('');
+  const[activeTag,setActiveTag]=useState('all');
+  const[showModal,setShowModal]=useState(false);
+  const[editingId,setEditingId]=useState(null);
+  const[checkedIngs,setCheckedIngs]=useState({});
+  const[sMult,setSMult]=useState(1);
+  const[urlInput,setUrlInput]=useState('');
+  const[parsing,setParsing]=useState(false);
+  const[parseError,setParseError]=useState('');
+  const[formTab,setFormTab]=useState('manual');
+  const[form,setForm]=useState({title:'',ingredients:'',steps:'',prepTime:'',cookTime:'',servings:'4',tags:[],tagInput:'',sourceUrl:'',notes:'',favEvan:false,favKara:false});
+  const[mealPlan,setMealPlan]=useState(null);
+  const[weekOff,setWeekOff]=useState(0);
+  const[groceryItems,setGroceryItems]=useState(null);
+  const[groceryChecked,setGroceryChecked]=useState({});
+  const[groceryInput,setGroceryInput]=useState('');
+  const[editGIdx,setEditGIdx]=useState(null);
+  const[editGVal,setEditGVal]=useState('');
+  const[groceryLog,setGroceryLog]=useState(null);
+  const[copyBanner,setCopyBanner]=useState('');
+  const[linkingDay,setLinkingDay]=useState(null);
+  const[histOff,setHistOff]=useState(0);
+  const[spinResult,setSpinResult]=useState('');
+  const[spinning,setSpinning]=useState(false);
+  const spinRef=useRef(null);
+  const loaded=useRef(false);
+
+  useEffect(()=>{if(loaded.current)return;loaded.current=true;
+    (async()=>{
+      let r=await fsGet('app','recipes');
+      if(!r){r=SAM;await fsSet('app','recipes',SAM)}
+      setRecipes(r);
+
+      let mp=await fsGet('app','mealplan');
+      if(!mp){mp=PREPOPULATED_HISTORY;await fsSet('app','mealplan',mp)}
+      setMealPlan(mp);
+
+      let g=await fsGet('app','grocery');
+      if(!g)g={items:[],checked:{}};
+      setGroceryItems(g.items||[]);setGroceryChecked(g.checked||{});
+
+      let gl=await fsGet('app','grocerylog');
+      if(!gl)gl=[];
+      setGroceryLog(gl);
+
+      // Listen for realtime updates
+      fsListen('app','recipes',v=>{if(v)setRecipes(v)});
+      fsListen('app','mealplan',v=>{if(v)setMealPlan(v)});
+      fsListen('app','grocery',v=>{if(v){setGroceryItems(v.items||[]);setGroceryChecked(v.checked||{})}});
+      fsListen('app','grocerylog',v=>{if(v)setGroceryLog(v)});
+    })();
+  },[]);
+
+  const saveR=useCallback(async d=>{setRecipes(d);fsSet('app','recipes',d)},[]);
+  const saveP=useCallback(async d=>{setMealPlan(d);fsSet('app','mealplan',d)},[]);
+  const saveG=useCallback(async(items,checked)=>{setGroceryItems(items);setGroceryChecked(checked);fsSet('app','grocery',{items,checked})},[]);
+  const saveGL=useCallback(async d=>{setGroceryLog(d);fsSet('app','grocerylog',d)},[]);
+  const flash=msg=>{setCopyBanner(msg);setTimeout(()=>setCopyBanner(''),2000)};
+
+  const logGroceryAdd=useCallback(item=>{
+    if(!groceryLog)return;
+    const today=new Date().toDateString();const updated=[...groceryLog];
+    const last=updated[updated.length-1];
+    if(last&&new Date(last.ts).toDateString()===today){if(!last.items.some(i=>i.toLowerCase()===item.toLowerCase()))last.items.push(item)}
+    else updated.push({ts:Date.now(),items:[item]});
+    saveGL(updated);
+  },[groceryLog,saveGL]);
+
+  const cws=useMemo(()=>{const d=getWS(new Date());d.setDate(d.getDate()+weekOff*7);return d},[weekOff]);
+  const cwk=wk(cws);const wm=mealPlan?mealPlan[cwk]||{}:{};
+  const setDM=(i,v)=>saveP({...mealPlan,[cwk]:{...wm,[i]:v}});
+
+  const allTags=useMemo(()=>{if(!recipes)return[];const s=new Set();recipes.forEach(r=>(r.tags||[]).forEach(t=>s.add(t)));return Array.from(s).sort()},[recipes]);
+  const filtered=useMemo(()=>{if(!recipes)return[];let l=recipes;if(activeTag==='evan-fav')l=l.filter(r=>r.favEvan);else if(activeTag==='kara-fav')l=l.filter(r=>r.favKara);else if(activeTag!=='all')l=l.filter(r=>(r.tags||[]).includes(activeTag));if(search.trim()){const q=search.toLowerCase();l=l.filter(r=>r.title.toLowerCase().includes(q)||(r.tags||[]).some(t=>t.includes(q))||(r.ingredients||[]).some(i=>i.toLowerCase().includes(q)))}return l.sort((a,b)=>(b.createdAt||0)-(a.createdAt||0))},[recipes,activeTag,search]);
+
+  const suggestions=useMemo(()=>getSuggestions(groceryLog),[groceryLog]);
+  const mealPool=useMemo(()=>getMealPool(mealPlan),[mealPlan]);
+  const seasonalInfo=useMemo(()=>getSeasonalHint(),[]);
+
+  const resetForm=()=>setForm({title:'',ingredients:'',steps:'',prepTime:'',cookTime:'',servings:'4',tags:[],tagInput:'',sourceUrl:'',notes:'',favEvan:false,favKara:false});
+  const openAdd=()=>{resetForm();setEditingId(null);setFormTab('manual');setShowModal(true);setParseError('');setUrlInput('')};
+  const openEdit=r=>{setForm({title:r.title,ingredients:(r.ingredients||[]).join('\n'),steps:(r.steps||[]).join('\n'),prepTime:String(r.prepTime||''),cookTime:String(r.cookTime||''),servings:String(r.servings||'4'),tags:r.tags||[],tagInput:'',sourceUrl:r.sourceUrl||'',notes:r.notes||'',favEvan:!!r.favEvan,favKara:!!r.favKara});setEditingId(r.id);setFormTab('manual');setShowModal(true)};
+  const handleSave=()=>{if(!form.title.trim())return;const r={id:editingId||String(Date.now()),title:form.title.trim(),ingredients:form.ingredients.split('\n').map(s=>s.trim()).filter(Boolean),steps:form.steps.split('\n').map(s=>s.trim()).filter(Boolean),prepTime:parseInt(form.prepTime)||0,cookTime:parseInt(form.cookTime)||0,servings:parseInt(form.servings)||4,tags:form.tags,sourceUrl:form.sourceUrl,notes:form.notes,favEvan:form.favEvan,favKara:form.favKara,createdAt:editingId?(recipes.find(x=>x.id===editingId)||{}).createdAt||Date.now():Date.now()};if(editingId)saveR(recipes.map(x=>x.id===editingId?r:x));else saveR([r,...recipes]);setShowModal(false);if(editingId){setSelectedId(editingId);setView('detail')}};
+  const handleDelete=id=>{saveR(recipes.filter(r=>r.id!==id));setView('list');setSelectedId(null)};
+  const toggleFav=(id,who)=>saveR(recipes.map(r=>r.id===id?{...r,[who]:!r[who]}:r));
+  const addTag=()=>{const t=form.tagInput.trim().toLowerCase();if(t&&!form.tags.includes(t))setForm({...form,tags:[...form.tags,t],tagInput:''});else setForm({...form,tagInput:''})};
+
+  const handleUrlParse=async()=>{if(!urlInput.trim())return;setParsing(true);setParseError('');try{const resp=await fetch('https://api.allorigins.win/raw?url='+encodeURIComponent(urlInput.trim()));if(!resp.ok)throw 0;const html=await resp.text();const p=parseHTML(html,urlInput.trim());if(!p.title||(p.title==='Imported Recipe'&&p.ingredients.length===0))setParseError('Could not parse. Try manually.');else{setForm({...form,title:p.title,ingredients:p.ingredients.join('\n'),steps:p.steps.join('\n'),prepTime:String(p.prepTime||''),cookTime:String(p.cookTime||''),servings:String(p.servings||'4'),tags:p.tags||[],sourceUrl:p.sourceUrl||urlInput.trim()});setFormTab('manual')}}catch(e){setParseError('Failed to fetch.')}setParsing(false)};
+
+  const copyPlan=()=>{const lines=DF.map((d,i)=>d+': '+(wm[i]||'(open)'));navigator.clipboard.writeText('Dinners:\n\n'+lines.join('\n')).then(()=>flash('Copied!'))};
+  const addGI=(val)=>{const v=(val||groceryInput).trim();if(!v)return;saveG([...groceryItems,v],groceryChecked);logGroceryAdd(v);if(!val)setGroceryInput('')};
+  const toggleGC=i=>saveG(groceryItems,{...groceryChecked,[i]:!groceryChecked[i]});
+  const removeGI=i=>{const ni=groceryItems.filter((_,x)=>x!==i);const nc={};ni.forEach((_,x)=>{const o=x>=i?x+1:x;if(groceryChecked[o])nc[x]=true});saveG(ni,nc)};
+  const clearChecked=()=>saveG(groceryItems.filter((_,i)=>!groceryChecked[i]),{});
+  const copyGL=()=>{navigator.clipboard.writeText('Grocery Store:\n\n'+groceryItems.filter((_,i)=>!groceryChecked[i]).join('\n')).then(()=>flash('Copied!'))};
+  const pullIngs=()=>{if(!recipes||!mealPlan)return;const wkm=mealPlan[cwk]||{};const ni=[];Object.values(wkm).forEach(meal=>{if(!meal)return;const m=recipes.find(r=>r.title.toLowerCase()===meal.toLowerCase());if(m&&m.ingredients)m.ingredients.forEach(ing=>{const c=ing.replace(/^[\d\/.]+\s*(cups?|tbsp|tsp|oz|lbs?|cloves?|cans?)\s*/i,'').trim();if(c&&!groceryItems.includes(c)&&!ni.includes(c))ni.push(c)})});if(ni.length){saveG([...groceryItems,...ni],groceryChecked);ni.forEach(i=>logGroceryAdd(i));flash(ni.length+' items added!')}else flash('No linked recipes found')};
+  const startEditG=i=>{setEditGIdx(i);setEditGVal(groceryItems[i])};
+  const saveEditG=()=>{if(editGIdx===null)return;const ni=[...groceryItems];ni[editGIdx]=editGVal.trim()||ni[editGIdx];saveG(ni,groceryChecked);setEditGIdx(null)};
+
+  const doSpin=()=>{
+    if(mealPool.length===0){flash('Add meals to your plan first!');return}
+    setSpinning(true);setSpinResult('');
+    // Prefer seasonal meals
+    const{season,holiday}=seasonalInfo;
+    let pool=mealPool;
+    const seasonal=pool.filter(m=>isSeasonalMeal(m.name,season));
+    if(seasonal.length>=5)pool=seasonal;
+    if(holiday){const hm=mealPool.filter(m=>isHolidayMeal(m.name,holiday));if(hm.length>0)pool=[...hm,...pool]}
+    let count=0;
+    if(spinRef.current)clearInterval(spinRef.current);
+    spinRef.current=setInterval(()=>{setSpinResult(pool[Math.floor(Math.random()*pool.length)].name);count++;if(count>=15){clearInterval(spinRef.current);setSpinning(false)}},120);
+  };
+
+  const allWK=useMemo(()=>mealPlan?Object.keys(mealPlan).sort().reverse():[],[mealPlan]);
+  const sel=recipes&&selectedId?recipes.find(r=>r.id===selectedId):null;
+  if(!recipes||!mealPlan)return e('div',{className:'app'},e('div',{className:'loading-screen'},'Loading Chef\'s Touch...'));
+
+  const renderDetail=()=>{
+    const bs=sel.servings||4,cs=Math.max(1,Math.round(bs*sMult));
+    return e('div',{className:'detail-view'},
+      e('button',{className:'detail-back',onClick:()=>{setView('list');setSelectedId(null);setSMult(1);setCheckedIngs({})}},IC.back,' Back'),
+      sel.sourceUrl&&e('a',{className:'url-badge',href:sel.sourceUrl,target:'_blank',rel:'noopener'},IC.link,' Original recipe'),
+      e('h1',{className:'detail-title'},sel.title),
+      e('div',{className:'fav-toggle'},
+        e('button',{className:'fav-btn'+(sel.favEvan?' evan-active':''),onClick:()=>toggleFav(sel.id,'favEvan')},sel.favEvan?'\u2605':'\u2606',' Evan'),
+        e('button',{className:'fav-btn'+(sel.favKara?' kara-active':''),onClick:()=>toggleFav(sel.id,'favKara')},sel.favKara?'\u2605':'\u2606',' Kara')),
+      e('div',{className:'detail-tags'},(sel.tags||[]).map(t=>e('span',{key:t,className:'recipe-tag-pill'},t))),
+      e('div',{className:'detail-meta'},sel.prepTime>0&&e('span',null,IC.clock,' Prep ',sel.prepTime,'m'),sel.cookTime>0&&e('span',null,IC.clock,' Cook ',sel.cookTime,'m'),e('span',null,IC.ppl,' ',bs)),
+      sel.ingredients&&sel.ingredients.length>0&&e('div',null,
+        e('h3',{className:'section-title'},'Ingredients'),
+        e('div',{className:'servings-ctrl'},e('button',{onClick:()=>setSMult(m=>Math.max(.25,m-.5))},'\u2212'),e('span',null,cs,' servings'),e('button',{onClick:()=>setSMult(m=>m+.5)},'+')),
+        e('ul',{className:'ingredient-list'},sel.ingredients.map((ing,i)=>{const sc=sMult===1?ing:ing.replace(/^([\d\/.]+)/,m=>{let n;if(m.includes('/')){const[a,b]=m.split('/');n=parseInt(a)/parseInt(b)}else n=parseFloat(m);if(isNaN(n))return m;const r=n*sMult;return r%1===0?String(r):r.toFixed(1)});const ch=checkedIngs[i];return e('li',{key:i,onClick:()=>setCheckedIngs({...checkedIngs,[i]:!ch})},e('span',{className:'ing-check'+(ch?' checked':'')}),e('span',{className:'ing-text'+(ch?' checked':'')},sc))}))),
+      sel.steps&&sel.steps.length>0&&e('div',null,e('h3',{className:'section-title'},'Instructions'),e('ol',{className:'step-list'},sel.steps.map((s,i)=>e('li',{key:i},e('span',null,s))))),
+      sel.notes&&e('div',{style:{marginBottom:'16px'}},e('h3',{className:'section-title'},'Notes'),e('p',{style:{fontSize:'14px',lineHeight:1.6,color:'var(--t2)'}},sel.notes)),
+      e('div',{className:'detail-actions'},e('button',{className:'btn btn-outline btn-sm',onClick:()=>openEdit(sel)},'Edit'),e('button',{className:'btn btn-danger btn-sm',onClick:()=>{if(confirm('Delete?'))handleDelete(sel.id)}},'Delete')))};
+
+  const renderList=()=>e('div',null,
+    e('div',{className:'header'},e('div',{className:'logo'},"chef's",e('span',null,' touch')),e('div',{className:'header-right'},filtered.length,' recipes')),
+    e('div',{className:'search-bar'},IC.search,e('input',{placeholder:'Search recipes, ingredients...',value:search,onChange:ev=>setSearch(ev.target.value)})),
+    e('div',{className:'tags'},
+      e('span',{className:'tag'+(activeTag==='all'?' active':''),onClick:()=>setActiveTag('all')},'All'),
+      e('span',{className:'tag'+(activeTag==='evan-fav'?' fav-evan':''),onClick:()=>setActiveTag(activeTag==='evan-fav'?'all':'evan-fav')},"\u2605 Evan's"),
+      e('span',{className:'tag'+(activeTag==='kara-fav'?' fav-kara':''),onClick:()=>setActiveTag(activeTag==='kara-fav'?'all':'kara-fav')},"\u2605 Kara's"),
+      allTags.map(t=>e('span',{key:t,className:'tag'+(activeTag===t?' active':''),onClick:()=>setActiveTag(activeTag===t?'all':t)},t))),
+    filtered.length===0?e('div',{className:'empty-state'},e('p',null,search||activeTag!=='all'?'No recipes match.':'No recipes yet. Tap + to add!')):
+    e('div',{className:'recipe-list'},filtered.map(r=>
+      e('div',{key:r.id,className:'recipe-card',onClick:()=>{setSelectedId(r.id);setView('detail');setSMult(1);setCheckedIngs({})}},
+        e('div',{className:'recipe-thumb'},gE(r.tags,r.title)),
+        e('div',{className:'recipe-info'},
+          e('div',{className:'recipe-title-row'},e('span',{className:'recipe-title'},r.title),e('span',{className:'fav-dots'},r.favEvan&&e('span',{className:'fav-dot evan'}),r.favKara&&e('span',{className:'fav-dot kara'}))),
+          e('div',{className:'recipe-meta'},(r.prepTime+r.cookTime>0)&&e('span',null,IC.clock,' ',(r.prepTime||0)+(r.cookTime||0),'m'),e('span',null,IC.ppl,' ',r.servings||4),(r.tags||[]).length>0&&e('span',{className:'recipe-tag-pill'},r.tags[0])))))),
+    e('button',{className:'fab',onClick:openAdd},IC.plus));
+
+  const renderPlan=()=>e('div',null,
+    e('div',{className:'header'},e('div',{className:'logo'},'dinner',e('span',null,' plan')),e('div',{className:'week-nav'},e('button',{onClick:()=>setWeekOff(o=>o-1)},IC.chL),e('span',null,weekOff===0?'This week':fWR(cws)),e('button',{onClick:()=>setWeekOff(o=>o+1)},IC.chR))),
+    e('div',{className:'plan-actions'},
+      e('button',{className:'btn btn-outline btn-sm',style:{display:'flex',alignItems:'center',gap:'5px'},onClick:copyPlan},IC.copy,' Copy to Notes'),
+      weekOff!==0&&e('button',{className:'btn btn-outline btn-sm',onClick:()=>setWeekOff(0)},'Today')),
+    mealPool.length>0&&e('div',{className:'randomizer'+(spinning?' spinning':'')},
+      e('div',{style:{fontSize:'12px',color:'var(--t3)',textTransform:'uppercase',letterSpacing:'0.3px',fontWeight:500}},"Can't decide?"),
+      e('div',{className:'randomizer-result'},spinResult||'\u2014'),
+      !spinning&&spinResult&&e('button',{className:'use-meal-btn',onClick:()=>{const ed=DF.findIndex((_,i)=>!wm[i]);if(ed>=0){setDM(ed,spinResult);flash('Added to '+DS[ed]+'!')}else flash('Week is full!')}},'Add to plan'),
+      seasonalInfo.holiday&&e('div',{className:'season-hint'},seasonalInfo.holiday+' is coming up!'),
+      e('div',{style:{marginTop:10}},e('button',{className:'spin-btn',onClick:doSpin,disabled:spinning},spinning?'Spinning...':'\u{1F3B2}  Surprise me'))),
+    e('div',null,DF.map((day,i)=>{const meal=wm[i]||'';const mr=recipes.find(r=>r.title.toLowerCase()===meal.toLowerCase());
+      return e('div',{key:i,className:'day-row'},e('div',{className:'day-name'},DS[i]),e('div',{className:'day-meal'},e('input',{value:meal,onChange:ev=>setDM(i,ev.target.value),placeholder:"What's for dinner?"})),
+        mr&&e('button',{className:'day-link-btn linked',onClick:()=>{setSelectedId(mr.id);setView('detail');setSMult(1);setCheckedIngs({});setTab('recipes')}},IC.chev),
+        !mr&&meal&&e('button',{className:'day-link-btn',onClick:()=>setLinkingDay(linkingDay===i?null:i)},IC.link))})),
+    linkingDay!==null&&e('div',{style:{marginTop:8}},e('p',{style:{fontSize:12,color:'var(--t2)',marginBottom:6}},'Pick a recipe:'),e('div',{className:'recipe-picker'},recipes.map(r=>e('div',{key:r.id,className:'recipe-pick-item',onClick:()=>{setDM(linkingDay,r.title);setLinkingDay(null)}},r.title)))),
+    e('p',{style:{fontSize:11,color:'var(--t3)',marginTop:14,lineHeight:1.5}},'Type anything \u2014 recipe, restaurant, "takeout". Matches a saved recipe? Tap the arrow to view it.'));
+
+  const renderHistory=()=>{
+    const weeks=allWK.slice(histOff*6,(histOff+1)*6);const tp=Math.ceil(allWK.length/6);
+    return e('div',null,
+      e('div',{className:'header'},e('div',{className:'logo'},'dinner',e('span',null,' history')),e('div',{className:'header-right'},allWK.length,' weeks')),
+      allWK.length===0?e('div',{className:'empty-state'},e('p',null,'History appears once you start planning.')):
+      e('div',null,weeks.map(w=>{const ws=new Date(w+'T00:00:00');const meals=mealPlan[w]||{};
+        return e('div',{key:w,className:'history-week'},e('div',{className:'history-week-header'},fWR(ws)),
+          DF.map((d,i)=>meals[i]?e('div',{key:i,className:'history-day'},e('span',{className:'hd-name'},DS[i]),e('span',null,meals[i])):null))}),
+        tp>1&&e('div',{style:{display:'flex',justifyContent:'center',gap:8,marginTop:12}},
+          histOff>0&&e('button',{className:'btn btn-outline btn-sm',onClick:()=>setHistOff(o=>o-1)},'Newer'),
+          histOff<tp-1&&e('button',{className:'btn btn-outline btn-sm',onClick:()=>setHistOff(o=>o+1)},'Older'))))};
+
+  const renderGrocery=()=>{
+    const uc=groceryItems.filter((_,i)=>!groceryChecked[i]).length,cc=groceryItems.length-uc;
+    const currentLower=groceryItems.map(i=>i.toLowerCase());
+    const filtSugs=suggestions.filter(s=>!currentLower.includes(s.name.toLowerCase()));
+    return e('div',null,
+      e('div',{className:'header'},e('div',{className:'logo'},'grocery',e('span',null,' list')),e('div',{className:'header-right'},uc,' items')),
+      e('div',{style:{display:'flex',gap:6,marginBottom:10,flexWrap:'wrap'}},
+        e('button',{className:'btn btn-outline btn-sm',style:{display:'flex',alignItems:'center',gap:5},onClick:copyGL},IC.copy,' Copy to Notes'),
+        cc>0&&e('button',{className:'btn btn-outline btn-sm',onClick:clearChecked},'Clear checked (',cc,')')),
+      e('button',{className:'pull-btn',onClick:pullIngs},IC.cal," Pull from this week's plan"),
+      e('div',{className:'grocery-add'},e('input',{value:groceryInput,onChange:ev=>setGroceryInput(ev.target.value),placeholder:'Add item...',onKeyDown:ev=>{if(ev.key==='Enter')addGI()}}),e('button',{className:'btn btn-primary btn-sm',onClick:()=>addGI()},'Add')),
+      filtSugs.length>0&&e('div',{className:'suggestions'},
+        e('div',{className:'suggestions-label'},'Frequently bought'),
+        e('div',{className:'sug-chips'},filtSugs.map(s=>e('span',{key:s.name,className:'sug-chip',onClick:()=>addGI(s.name)},'+ ',s.name)))),
+      groceryItems.length===0?e('div',{className:'empty-state'},e('p',null,'Your list is empty.')):
+      e('div',null,groceryItems.map((item,i)=>e('div',{key:i+'-'+item,className:'grocery-item'},
+        e('span',{className:'ing-check'+(groceryChecked[i]?' checked':''),onClick:()=>toggleGC(i),style:{cursor:'pointer'}}),
+        editGIdx===i?e('input',{className:'grocery-edit-input',value:editGVal,onChange:ev=>setEditGVal(ev.target.value),onBlur:saveEditG,onKeyDown:ev=>{if(ev.key==='Enter')saveEditG()},autoFocus:true}):
+        e('span',{className:'grocery-text'+(groceryChecked[i]?' checked':''),onDoubleClick:()=>startEditG(i)},item),
+        editGIdx!==i&&e('button',{onClick:()=>startEditG(i),style:{background:'none',border:'none',color:'var(--t3)',cursor:'pointer',padding:2,fontSize:11,fontFamily:'var(--font)'}},'\u270E'),
+        e('button',{onClick:()=>removeGI(i),style:{background:'none',border:'none',color:'var(--t3)',cursor:'pointer',padding:2,fontSize:15}},'\u00D7')))))};
+
+  return e('div',{className:'app'},
+    copyBanner&&e('div',{className:'copy-banner',key:Date.now()},copyBanner),
+    tab==='recipes'&&view==='detail'&&sel?renderDetail():null,
+    tab==='recipes'&&view!=='detail'?renderList():null,
+    tab==='plan'?renderPlan():null,
+    tab==='history'?renderHistory():null,
+    tab==='grocery'?renderGrocery():null,
+    e('div',{className:'bottom-nav'},
+      e('button',{className:'nav-item'+(tab==='recipes'?' active':''),onClick:()=>{setTab('recipes');setView('list');setSelectedId(null)}},IC.book,'Recipes'),
+      e('button',{className:'nav-item'+(tab==='plan'?' active':''),onClick:()=>{setTab('plan');setLinkingDay(null)}},IC.cal,'Plan'),
+      e('button',{className:'nav-item'+(tab==='history'?' active':''),onClick:()=>{setTab('history');setHistOff(0)}},IC.hist,'History'),
+      e('button',{className:'nav-item'+(tab==='grocery'?' active':''),onClick:()=>setTab('grocery')},IC.cart,'Grocery')),
+    showModal&&e('div',{className:'modal-overlay',onClick:ev=>{if(ev.target===ev.currentTarget)setShowModal(false)}},
+      e('div',{className:'modal'},
+        e('div',{className:'modal-header'},e('h2',null,editingId?'Edit recipe':'Add recipe'),e('button',{className:'close-btn',onClick:()=>setShowModal(false)},IC.x)),
+        !editingId&&e('div',{className:'tab-bar'},e('button',{className:formTab==='url'?'active':'',onClick:()=>setFormTab('url')},'Import URL'),e('button',{className:formTab==='manual'?'active':'',onClick:()=>setFormTab('manual')},'Manual')),
+        formTab==='url'&&!editingId&&e('div',null,
+          e('div',{style:{display:'flex',gap:8,marginBottom:12}},e('input',{placeholder:'Paste recipe URL...',value:urlInput,onChange:ev=>setUrlInput(ev.target.value),onKeyDown:ev=>{if(ev.key==='Enter')handleUrlParse()},style:{flex:1,borderRadius:'var(--r-md)',border:'0.5px solid var(--bd)',padding:'10px 12px',fontSize:16,background:'var(--bg)',color:'var(--t1)'}}),e('button',{className:'btn btn-primary btn-sm',onClick:handleUrlParse,disabled:parsing},parsing?'...':'Import')),
+          parseError&&e('p',{style:{fontSize:12,color:'#E24B4A',marginTop:6}},parseError)),
+        formTab==='manual'&&e('div',null,
+          e('div',{className:'form-group'},e('label',null,'Recipe name'),e('input',{value:form.title,onChange:ev=>setForm({...form,title:ev.target.value}),placeholder:"e.g. Grandma's Chocolate Cake"})),
+          e('div',{className:'form-group'},e('label',null,'Favorites'),e('div',{className:'fav-toggle',style:{margin:0}},e('button',{className:'fav-btn'+(form.favEvan?' evan-active':''),onClick:()=>setForm({...form,favEvan:!form.favEvan}),type:'button'},form.favEvan?'\u2605':'\u2606',' Evan'),e('button',{className:'fav-btn'+(form.favKara?' kara-active':''),onClick:()=>setForm({...form,favKara:!form.favKara}),type:'button'},form.favKara?'\u2605':'\u2606',' Kara'))),
+          e('div',{className:'form-group'},e('label',null,'Tags'),e('div',{className:'tag-input-row'},form.tags.map(t=>e('span',{key:t,className:'mini-tag'},t,e('button',{onClick:()=>setForm({...form,tags:form.tags.filter(x=>x!==t)})},'\u00D7'))),e('input',{value:form.tagInput,onChange:ev=>setForm({...form,tagInput:ev.target.value}),onKeyDown:ev=>{if(ev.key==='Enter'){ev.preventDefault();addTag()}},placeholder:'Add tag...',style:{border:'0.5px solid var(--bd)',borderRadius:'var(--r-md)',padding:'6px 10px',fontSize:13}}))),
+          e('div',{style:{display:'flex',gap:8}},
+            e('div',{className:'form-group',style:{flex:1}},e('label',null,'Prep (min)'),e('input',{type:'number',value:form.prepTime,onChange:ev=>setForm({...form,prepTime:ev.target.value})})),
+            e('div',{className:'form-group',style:{flex:1}},e('label',null,'Cook (min)'),e('input',{type:'number',value:form.cookTime,onChange:ev=>setForm({...form,cookTime:ev.target.value})})),
+            e('div',{className:'form-group',style:{flex:1}},e('label',null,'Servings'),e('input',{type:'number',value:form.servings,onChange:ev=>setForm({...form,servings:ev.target.value})}))),
+          e('div',{className:'form-group'},e('label',null,'Ingredients (one per line)'),e('textarea',{value:form.ingredients,onChange:ev=>setForm({...form,ingredients:ev.target.value}),placeholder:'2 cups flour\n1 cup sugar',rows:5})),
+          e('div',{className:'form-group'},e('label',null,'Instructions (one step per line)'),e('textarea',{value:form.steps,onChange:ev=>setForm({...form,steps:ev.target.value}),placeholder:'Preheat oven...',rows:5})),
+          e('div',{className:'form-group'},e('label',null,'Notes'),e('textarea',{value:form.notes,onChange:ev=>setForm({...form,notes:ev.target.value}),placeholder:'Tips, variations...',rows:2})),
+          e('div',{style:{display:'flex',gap:8,justifyContent:'flex-end',marginTop:8}},e('button',{className:'btn btn-outline',onClick:()=>setShowModal(false)},'Cancel'),e('button',{className:'btn btn-primary',onClick:handleSave},editingId?'Save':'Add recipe')))))
+  );
+}
+ReactDOM.createRoot(document.getElementById('root')).render(e(App));
+</script>
+</body>
+</html>
