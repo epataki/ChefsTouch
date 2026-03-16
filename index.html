@@ -669,7 +669,7 @@ const CONVERSIONS = {
 // ================================================================
 // MAIN APP COMPONENT
 // ================================================================
-function App() {
+function App({ prefillRecipe }) {
   // ----- ALL STATE -----
   const [recipes, setRecipes] = useState(null);
   const [currentTab, setCurrentTab] = useState('recipes');
@@ -746,7 +746,40 @@ function App() {
       fsListen(DOC_KEYS.grocerylog, v => { if (v) setGroceryLog(v); });
     })();
   }, []);
+  
+  // ----- PREFILL RECIPE FROM URL -----
+  useEffect(() => {
+    if (!prefillRecipe) return;
 
+    setEditingId(null);
+    setParseError('');
+    setUrlInput('');
+    setFormTab('manual');
+    setForm({
+      title: prefillRecipe.title || '',
+      ingredients: (prefillRecipe.ingredients || []).filter(Boolean).join('\n'),
+      steps: (prefillRecipe.steps || []).filter(Boolean).join('\n'),
+      prepTime: prefillRecipe.prepTime || '',
+      cookTime: prefillRecipe.cookTime || '',
+      servings: prefillRecipe.servings || '4',
+      tags: prefillRecipe.tags
+        ? String(prefillRecipe.tags).split(',').map(t => t.trim().toLowerCase()).filter(Boolean)
+        : [],
+      tagInput: '',
+      sourceUrl: prefillRecipe.source || '',
+      notes: prefillRecipe.notes || '',
+      favEvan: false,
+      favKara: false
+    });
+
+    setCurrentTab('recipes');
+    setCurrentView('list');
+    setShowModal(true);
+
+    // optional: clean the URL after prefill so it doesn't keep reopening
+    window.history.replaceState({}, '', window.location.pathname);
+  }, [prefillRecipe]);
+  
   // ----- SAVE HELPERS -----
   const saveRecipes = useCallback(d => { setRecipes(d); fsSet(DOC_KEYS.recipes, d); }, []);
   const savePlan = useCallback(d => { setMealPlan(d); fsSet(DOC_KEYS.mealplan, d); }, []);
