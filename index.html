@@ -892,27 +892,70 @@ function App({ prefillRecipe }) {
     else setForm({ ...form, tagInput: '' });
   };
 
-  const doUrlImport = async () => {
-    if (!urlInput.trim()) return;
-    setIsParsing(true); setParseError('');
-    try {
-      const resp = await fetch('https://api.allorigins.win/raw?url=' + encodeURIComponent(urlInput.trim()));
-      if (!resp.ok) throw 0;
-      const html = await resp.text();
-      const parsed = parseRecipeFromHTML(html, urlInput.trim());
-      if (!parsed.title || (parsed.title === 'Imported Recipe' && parsed.ingredients.length === 0)) {
-        setParseError('Could not parse. Try adding manually.');
-      } else {
-        setForm({ ...form, title: parsed.title, ingredients: parsed.ingredients.join('\n'),
-          steps: parsed.steps.join('\n'), prepTime: String(parsed.prepTime || ''),
-          cookTime: String(parsed.cookTime || ''), servings: String(parsed.servings || '4'),
-          tags: parsed.tags || [], sourceUrl: parsed.sourceUrl || urlInput.trim() });
-        setFormTab('manual');
-      }
-    } catch (e) { setParseError('Failed to fetch.'); }
-    setIsParsing(false);
-  };
+const doUrlImport = async () => {
+  if (!urlInput.trim()) return;
 
+  setIsParsing(true);
+  setParseError('');
+
+  try {
+    const targetUrl = urlInput.trim();
+
+    const proxyUrls = [
+      'https://api.allorigins.win/raw?url=' + encodeURIComponent(targetUrl),
+      'https://r.jina.ai/http://' + targetUrl.replace(/^https?:\/\//, '')
+    ];
+
+    let html = '';
+    let lastError = null;
+
+    for (const proxyUrl of proxyUrls) {
+      try {
+        const resp = await fetch(proxyUrl);
+        if (!resp.ok) continue;
+
+        const text = await resp.text();
+        if (text && text.trim()) {
+          html = text;
+          break;
+        }
+      } catch (err) {
+        lastError = err;
+      }
+    }
+
+    if (!html) throw lastError || new Error('Failed to fetch');
+
+    const parsed = parseRecipeFromHTML(html, targetUrl);
+
+    if (!parsed.title || (parsed.title === 'Imported Recipe' && parsed.ingredients.length === 0)) {
+      setParseError('Could not parse. Try adding manually.');
+    } else {
+      setForm({
+        ...form,
+        title: parsed.title || '',
+        ingredients: (parsed.ingredients || []).join('\n'),
+        steps: (parsed.steps || []).join('\n'),
+        prepTime: String(parsed.prepTime || ''),
+        cookTime: String(parsed.cookTime || ''),
+        servings: String(parsed.servings || '4'),
+        tags: parsed.tags || [],
+        tagInput: '',
+        sourceUrl: parsed.sourceUrl || targetUrl,
+        notes: parsed.notes || '',
+        favEvan: false,
+        favKara: false
+      });
+
+      setFormTab('manual');
+      setParseError('');
+    }
+  } catch (e) {
+    setParseError('Failed to fetch.');
+  }
+
+  setIsParsing(false);
+};
   // ----- SHARE RECIPE -----
   const shareRecipe = (recipe) => {
     let text = recipe.title + '\n\n';
