@@ -7,10 +7,9 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#16a34a">
 <title>Chef's Touch</title>
-
 <link rel="apple-touch-icon" href="icon.png">
 <link rel="icon" type="image/png" href="icon.png">
-
+<link rel="manifest" href="manifest.json">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500&family=Playfair+Display:wght@500&display=swap" rel="stylesheet">
 <style>
@@ -1274,9 +1273,35 @@ function App() {
     showModal && renderModal()
   );
 }
+// ===== PREFILL RECIPE FROM URL PARAMETERS =====
+function getRecipeFromURL() {
+  const params = new URLSearchParams(window.location.search);
 
+  if (!params.get("import_recipe")) return null;
+
+  return {
+    title: decodeURIComponent(params.get("title") || ""),
+    servings: decodeURIComponent(params.get("servings") || ""),
+    prepTime: decodeURIComponent(params.get("prep") || ""),
+    cookTime: decodeURIComponent(params.get("cook") || ""),
+    totalTime: decodeURIComponent(params.get("total") || ""),
+    tags: decodeURIComponent(params.get("tags") || ""),
+    ingredients: (params.get("ingredients") || "")
+      .split("||")
+      .map(i => decodeURIComponent(i)),
+    steps: (params.get("steps") || "")
+      .split("||")
+      .map(s => decodeURIComponent(s)),
+    notes: decodeURIComponent(params.get("notes") || ""),
+    source: decodeURIComponent(params.get("source") || "")
+  };
+}
 // ===== MOUNT =====
-ReactDOM.createRoot(document.getElementById('root')).render(el(App));
+const prefillRecipe = getRecipeFromURL();
+
+ReactDOM.createRoot(document.getElementById('root')).render(
+  el(App, { prefillRecipe })
+);
 
 </script>
 
